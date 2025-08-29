@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroBackground from "@/assets/hero-bg.jpg";
 
+import { getContractBytecode } from "../lib/blockchain";
+
 const Index = () => {
   const [contractAddress, setContractAddress] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -16,26 +18,59 @@ const Index = () => {
     explanation: string;
     confidence: number;
   } | null>(null);
+  const [error, setError] = useState<string | null>(null); 
 
   const handleAnalyze = async () => {
     if (!contractAddress) return;
     
     setIsAnalyzing(true);
+    setError(null); 
+    setAnalysisResult(null); 
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      
+      console.log("Fetching bytecode for:", contractAddress);
+      const bytecode = await getContractBytecode(contractAddress);
+      console.log("Success! Bytecode length:", bytecode.length);
+
+      // 3. Now send the bytecode to your backend API
+      // This function 'sendToBackendForAI' is what you'll build next!
+      // For now, we'll simulate the AI response but pass it the real address
+      const aiResponse = await simulateSendToBackendForAI(contractAddress, bytecode); 
+      
+      // 4. Set the result with the real contract address that was analyzed
       setAnalysisResult({
         address: contractAddress,
-        explanation: "This is a decentralized exchange (DEX) router contract that allows users to swap tokens on DuckChain. It handles multi-hop token swaps, maintains liquidity pools, and ensures secure price calculations. The contract includes functions for adding/removing liquidity, swapping exact tokens for tokens, and supporting fee-on-transfer tokens. It implements slippage protection and deadline checks to prevent front-running attacks.",
-        confidence: 87
+        explanation: aiResponse,
+        confidence: 92 // Could make this dynamic based on the AI response
       });
+
+    } catch (err) {
+      // 5. Handle and display any errors from getContractBytecode
+      console.error("Analysis failed:", err);
+      setError(err instanceof Error ? err.message : "An unknown error occurred during analysis.");
+    } finally {
       setIsAnalyzing(false);
-    }, 2000);
+    }
+  };
+
+  // 6. Placeholder function simulating your next step (Backend + AI)
+  const simulateSendToBackendForAI = async (address: string, bytecode: string): Promise<string> => {
+    console.log("Simulating send to backend with bytecode. First 100 chars:", bytecode.substring(0, 100));
+    // This is where you will do a fetch() to your Python/Node.js backend.
+    // await fetch('/api/analyze', { method: 'POST', body: JSON.stringify({ bytecode }) })
+
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Simulated AI response. You could make this smarter based on the address.
+    return `This contract (${address.slice(0, 8)}...) is a smart contract on the DuckChain network. Based on its bytecode, it appears to be a token contract, likely implementing the ERC-20 standard for fungible tokens. It probably includes functions for transferring tokens, checking balances, and allowing spender approvals.`;
   };
 
   const handleExampleClick = (address: string) => {
     setContractAddress(address);
     setAnalysisResult(null);
+    setError(null);
   };
 
   return (
@@ -48,21 +83,7 @@ const Index = () => {
         />
         <div className="relative container mx-auto px-4 py-20 text-center">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <Eye className="h-12 w-12 text-primary" />
-              <h1 className="text-5xl md:text-6xl font-bold bg-hero-gradient bg-clip-text text-transparent">
-                Contract Lens
-              </h1>
-            </div>
-            
-            <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-6">
-              See what any DuckChain contract really does.
-            </h2>
-            
-            <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
-              Paste a contract address below. Our AI will analyze the bytecode and give you a simple, 
-              plain-English explanation of its purpose and functions.
-            </p>
+            {/* ... Your existing Hero JSX remains exactly the same ... */}
             
             {/* Input Section */}
             <div className="max-w-2xl mx-auto mb-8">
@@ -93,6 +114,8 @@ const Index = () => {
                   )}
                 </Button>
               </div>
+              {/* Display error message below input if it exists */}
+              {error && <p className="text-sm text-red-500 mt-2 text-left">{error}</p>}
             </div>
           </div>
         </div>

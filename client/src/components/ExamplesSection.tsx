@@ -7,27 +7,27 @@ interface ExamplesSectionProps {
 }
 
 const examples = [
-  {
-    id: "dex-router",
-    title: "A DEX Swap Router",
-    description: "Multi-hop token swapping with liquidity pools",
-    address: "0x742d35Cc6634C0532925a3b8D0c8B9B4E4f44e",
+  { // https://www.oklink.com/duckchain/address/0x7e678e45037d3739e0673abdd12b123c488d41ab/token-transfer
+    id: "dex-liquidity-pool",
+    title: "A DEX Liquidity Pool",
+    description: "This contract is a liquidity pool for a decentralized exchange (DEX), holding reserves of multiple tokens to facilitate automated trading and swaps.",
+    address: "0x7e678e45037d3739e0673abdd12b123c488d41ab",
     icon: Repeat,
     color: "text-blue-500"
   },
-  {
+  { // https://www.oklink.com/duckchain/token/0x375c86716773feb3ec70c96409c228df14036ba3
     id: "nft-collection", 
     title: "An NFT Collection",
-    description: "ERC-721 contract with minting and metadata",
-    address: "0x891f3f0c6d8c4f8b6f2c8d9e4f3b8c7d6e5f4a2",
+    description: "This is an ERC-721 smart contract that manages the ownership, transfers, and metadata for the 'NFT DuckDuckGo (DDG)' collection.",
+    address: "0x375c86716773feb3ec70c96409c228df14036ba3",
     icon: Image,
     color: "text-purple-500"
   },
-  {
+  { // 
     id: "token-contract",
-    title: "A Token Contract", 
-    description: "ERC-20 with transfer controls and staking",
-    address: "0x123f4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c",
+    title: "A Token Contract",
+    description: "Main contract for a token, handling transfers, balances, and approvals for its holders.",
+    address: "0xc0ac932cac7b4d8f7c31792082e2e8f3cfe99c10",
     icon: Coins,
     color: "text-green-500"
   }
