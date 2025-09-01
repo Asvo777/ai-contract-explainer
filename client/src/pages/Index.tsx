@@ -8,9 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroBackground from "@/assets/hero-bg.jpg";
 
-// Use VITE_API_URL from Vite's environment variables
-const API_URL = import.meta.env.VITE_API_URL as string;
-
 import { getContractBytecode } from "../lib/blockchain";
 
 const Index = () => {
@@ -35,8 +32,8 @@ const Index = () => {
       console.log("Fetching bytecode for:", contractAddress);
       const bytecode = await getContractBytecode(contractAddress);
       console.log("Success! Bytecode length:", bytecode.length);
-      
-      const aiResponse = await fetch(`${API_URL}/api/analyze`, {
+
+      const aiResponse = await fetch(`https://ai-contract-explainer-production.up.railway.app/api/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bytecode, address: contractAddress })
