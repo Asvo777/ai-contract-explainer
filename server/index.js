@@ -4,7 +4,16 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import 'dotenv/config'; // To load .env variables
 
 const app = express();
-app.use(cors()); // Allow your frontend to call this backend
+
+// Configure CORS to allow requests from your Vercel frontend
+app.use(cors({
+  origin: [
+    'https://ai-contract-explainer-duckchain.vercel.app',
+    'http://localhost:8080' // Optional: for local development
+  ],
+  credentials: true
+}));
+
 app.use(express.json()); // Parse JSON bodies
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
