@@ -33,21 +33,23 @@ const Index = () => {
       const bytecode = await getContractBytecode(contractAddress);
       console.log("Success! Bytecode length:", bytecode.length);
 
-      // 3. Now send the bytecode to your backend API
-      // This function 'sendToBackendForAI' is what you'll build next!
-      // For now, we'll simulate the AI response but pass it the real address
-      const aiResponse = await simulateSendToBackendForAI(contractAddress, bytecode); 
-      
-      // 4. Set the result with the real contract address that was analyzed
+      // In your handleAnalyze function
+      const aiResponse = await fetch('http://localhost:3001/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bytecode, address: contractAddress })
+      }).then(res => res.json());
+
       setAnalysisResult({
         address: contractAddress,
-        explanation: aiResponse,
-        confidence: 92 // Could make this dynamic based on the AI response
+        explanation: aiResponse.explanation,
+        confidence: 92
       });
 
     } catch (err) {
       // 5. Handle and display any errors from getContractBytecode
       console.error("Analysis failed:", err);
+      console.log(err);
       setError(err instanceof Error ? err.message : "An unknown error occurred during analysis.");
     } finally {
       setIsAnalyzing(false);

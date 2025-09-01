@@ -1,24 +1,33 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+// server/index.js
+import express from 'express';
+import cors from 'cors';
+import axios from 'axios';
+import { GeneralChat } from "@chaingpt/generalchat";
+import 'dotenv/config';
 pnpm-debug.log*
-lerna-debug.log*
-
+const app = express();
+app.use(cors());
+app.use(express.json());
 node_modules
-dist
+const chat = new GeneralChat({ apiKey: process.env.CHAINGPT_API_KEY });
 dist-ssr
-*.local
-
+app.post('/api/analyze', async (req, res) => {
+  const { bytecode, address } = req.body;
 # Editor directories and files
-.vscode/*
+  const prompt = `You are an expert blockchain analyst. Explain the following smart contract bytecode in simple, plain English for a beginner.
 !.vscode/extensions.json
-.idea
-.DS_Store
+Contract Address: ${address}
+Bytecode: ${bytecode}
 *.suo
-*.ntvs*
+Please describe its most likely purpose and what kind of dApp it might belong to (e.g., DEX, lending, NFT, token). Keep the explanation under 150 words.`;
 *.njsproj
-*.sln
-*.sw?
+  try {
+    // 1. MAKE REQUEST TO THE CORRECT ENDPOINT
+    const response = await chat.createChatBlob({      question: prompt,      chatHistory: "off"    });    // 2. EXTRACT RESPONSE FROM THE CORRECT PROPERTY    // The response structure is likely response.data.reply or similar    const explanation = response.data.bot; // <-- Try .reply first    // If that doesn't work, try: response.data.response    // Check the console log below if it fails    res.json({ explanation });  } catch (error) {    console.error("ChainGPT API error:", error);    if (error.response) {      console.error("Response data:", error.response.data);    }    // Optionally send a more informative error to the client    res.status(500).json({      error: "ChainGPT API error",      details: error.message || error.toString(),      response: error.response ? error.response.data : undefined,    });
+  }
+});
+
+const PORT = 3001;
+app.listen(PORT, () => {
+  console.log(`✅ Server is running on http://localhost:${PORT}`);
+});

@@ -1,0 +1,22 @@
+{
+  "name": "ai-explainer-server",
+  "version": "1.0.0",
+  "description": "Backend server for AI Contract Explainer",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@chaingpt/generalchat": "^0.0.17",
+    "@google/genai": "^1.16.0",
+    "@google/generative-ai": "^0.24.1",
+    "@huggingface/inference": "^4.7.1",
+    "axios": "^1.11.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "openai": "^5.16.0"
+  }
+}
