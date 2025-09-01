@@ -2,7 +2,7 @@
   "name": "autotos-root",
   "private": true,
   "workspaces": [
-    "client"
+    "server"
   ],
   "scripts": {
     "build": "cd server && npm install && npm run build",
