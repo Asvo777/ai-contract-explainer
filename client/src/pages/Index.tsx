@@ -7,6 +7,8 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroBackground from "@/assets/hero-bg.jpg";
+// Use VITE_API_URL from Vite's environment variables
+const VITE_API_URL = import.meta.env.VITE_API_URL as string;
 
 import { getContractBytecode } from "../lib/blockchain";
 
@@ -34,7 +36,7 @@ const Index = () => {
       console.log("Success! Bytecode length:", bytecode.length);
 
       // In your handleAnalyze function
-      const aiResponse = await fetch('http://localhost:3001/api/analyze', {
+      const aiResponse = await fetch(VITE_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bytecode, address: contractAddress })
