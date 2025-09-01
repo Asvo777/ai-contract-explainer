@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "node index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "echo 'No build step needed'"
   },
   "dependencies": {
     "@chaingpt/generalchat": "^0.0.17",
