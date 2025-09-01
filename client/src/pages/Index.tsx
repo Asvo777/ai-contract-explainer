@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroBackground from "@/assets/hero-bg.jpg";
+
 // Use VITE_API_URL from Vite's environment variables
 const API_URL = import.meta.env.VITE_API_URL as string;
 
@@ -34,8 +35,7 @@ const Index = () => {
       console.log("Fetching bytecode for:", contractAddress);
       const bytecode = await getContractBytecode(contractAddress);
       console.log("Success! Bytecode length:", bytecode.length);
-
-      // In your handleAnalyze function
+      
       const aiResponse = await fetch(`${API_URL}/api/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -49,26 +49,13 @@ const Index = () => {
       });
 
     } catch (err) {
-      // 5. Handle and display any errors from getContractBytecode
+      
       console.error("Analysis failed:", err);
       console.log(err);
       setError(err instanceof Error ? err.message : "An unknown error occurred during analysis.");
     } finally {
       setIsAnalyzing(false);
     }
-  };
-
-  // 6. Placeholder function simulating your next step (Backend + AI)
-  const simulateSendToBackendForAI = async (address: string, bytecode: string): Promise<string> => {
-    console.log("Simulating send to backend with bytecode. First 100 chars:", bytecode.substring(0, 100));
-    // This is where you will do a fetch() to your Python/Node.js backend.
-    // await fetch('/api/analyze', { method: 'POST', body: JSON.stringify({ bytecode }) })
-
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Simulated AI response. You could make this smarter based on the address.
-    return `This contract (${address.slice(0, 8)}...) is a smart contract on the DuckChain network. Based on its bytecode, it appears to be a token contract, likely implementing the ERC-20 standard for fungible tokens. It probably includes functions for transferring tokens, checking balances, and allowing spender approvals.`;
   };
 
   const handleExampleClick = (address: string) => {

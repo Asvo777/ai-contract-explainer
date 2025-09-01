@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { GoogleGenerativeAI } from '@google/generative-ai'; // <-- Replace OpenAI import
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import 'dotenv/config'; // To load .env variables
 
 const app = express();
@@ -15,7 +15,6 @@ console.log("Using Google Gemini API Key:", process.env.GEMINI_API_KEY ? "Set" :
 app.post('/api/analyze', async (req, res) => {
   const { bytecode, address } = req.body;
 
-  // THE PROMPT IS THE SECRET SAUCE
 const prompt = `
 ROLE: You are a security auditor and educator. Your task is to explain complex smart contract bytecode to beginners.
 
@@ -40,11 +39,11 @@ Remember: You are explaining the contract's behavior, not its code.
 `;
 
    try {
-    // 3. Get the model and generate content
+    
     const result = await model.generateContent([prompt]);
     const explanation = result.response.text();
 
-    // 4. Send the explanation back to the frontend
+    
     res.json({ explanation });
 
   } catch (error) {
@@ -53,7 +52,7 @@ Remember: You are explaining the contract's behavior, not its code.
   }
 });
 
-const PORT = 3001;
-app.listen(PORT, () => {
-  console.log(`✅ Server is running on http://localhost:${PORT}`);
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Server is running on port ${PORT}`);
 });
