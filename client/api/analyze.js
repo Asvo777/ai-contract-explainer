@@ -11,7 +11,7 @@ app.use(express.json());
 let genAI, model;
 try {
   genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  model = genAI.getGenerativeModel({ model: "gemini-pro" }); // Using reliable model
+  model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Using reliable model
   console.log("✅ Google Gemini initialized successfully");
 } catch (error) {
   console.error("❌ Gemini initialization failed:", error.message);
