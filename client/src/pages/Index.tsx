@@ -44,8 +44,10 @@ const Index = () => {
         explanation: aiResponse.explanation,
         confidence: 92
       });
+      
 
     } catch (err) {
+      
       console.error("Analysis failed:", err);
       console.log(err);
       setError(err instanceof Error ? err.message : "An unknown error occurred during analysis.");
