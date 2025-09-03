@@ -47,20 +47,20 @@ app.post('/api/analyze', async (req, res) => {
   RETURN JSON FORMAT:
   {
     "explanation": "Simple explanation following this structure: 1. Purpose: [overall goal]. 2. Key Functions: [2-3 capabilities]. 3. Summary: [beginner summary]",
-    "confidence": 63
+    "confidence": 85
   }
   `;
 
   try {
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
-
+    
     // Try to parse JSON from the response
     try {
       // Extract JSON from the response (Gemini might add extra text)
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        const analysis = JSON.parse(jsonMatch[0]).replace(/\d+\./g, '\n');
+        const analysis = JSON.parse(jsonMatch[0]);
         res.json(analysis);
       } else {
         throw new Error("No JSON found in response");
