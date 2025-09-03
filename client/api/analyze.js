@@ -47,7 +47,7 @@ app.post('/api/analyze', async (req, res) => {
   RETURN JSON FORMAT:
   {
     "explanation": "Simple explanation following this structure: 1. Purpose: [overall goal]. 2. Key Functions: [2-3 capabilities]. 3. Summary: [beginner summary]",
-    "confidence": 85
+    "confidence": 63
   }
   `;
 
@@ -68,7 +68,7 @@ app.post('/api/analyze', async (req, res) => {
     } catch (parseError) {
       // Fallback if JSON parsing fails
       res.json({ 
-        explanation: responseText, 
+        explanation: responseText.replace(/\d+\./g, '\n'), 
         confidence: 75 
       });
     }
