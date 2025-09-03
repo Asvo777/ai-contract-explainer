@@ -53,8 +53,8 @@ app.post('/api/analyze', async (req, res) => {
 
   try {
     const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
-    
+    const responseText = result.response.text().replace(/\d+\./g, '\n');
+
     // Try to parse JSON from the response
     try {
       // Extract JSON from the response (Gemini might add extra text)
@@ -68,7 +68,7 @@ app.post('/api/analyze', async (req, res) => {
     } catch (parseError) {
       // Fallback if JSON parsing fails
       res.json({ 
-        explanation: responseText.replace(/\d+\./g, '\n'), 
+        explanation: responseText, 
         confidence: 75 
       });
     }
