@@ -28,28 +28,38 @@ const Index = () => {
     setAnalysisResult(null); 
     
     try {
-      
       console.log("Fetching bytecode for:", contractAddress);
       const bytecode = await getContractBytecode(contractAddress);
       console.log("Success! Bytecode length:", bytecode.length);
 
-      const aiResponse = await fetch('/api/analyze', {
+      // 1. First get the response without parsing JSON
+      const response = await fetch("/api/analyze", {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ bytecode, address: contractAddress })
-      }).then(res => res.json());
+      });
+
+      // 2. Check if the response is OK (status 200-299)
+      if (!response.ok) {
+        // Get the actual text to see what error the server returned
+        const errorText = await response.text();
+        console.error("Server error:", response.status, errorText);
+        throw new Error(`Server error: ${response.status} - ${errorText.substring(0, 100)}...`);
+      }
+
+      // 3. Only now try to parse as JSON
+      const aiResponse = await response.json();
 
       setAnalysisResult({
         address: contractAddress,
         explanation: aiResponse.explanation,
         confidence: 92
       });
-      
 
     } catch (err) {
-      
       console.error("Analysis failed:", err);
-      console.log(err);
       setError(err instanceof Error ? err.message : "An unknown error occurred during analysis.");
     } finally {
       setIsAnalyzing(false);
