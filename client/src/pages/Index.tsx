@@ -31,7 +31,7 @@ const handleAnalyze = async () => {
     console.log("Fetching bytecode for:", contractAddress);
     const bytecode = await getContractBytecode(contractAddress);
     
-    // Basic validation for empty bytecode (e.g., an EOA address was entered)
+    // Basic validation for empty bytecode
     if (!bytecode || bytecode === '0x') {
       throw new Error("This address does not contain any contract code. Please provide a valid contract address.");
     }
@@ -63,8 +63,6 @@ const handleAnalyze = async () => {
     // Parse the successful JSON response
     const aiResponse = await response.json();
 
-    // 1. FIX: Use the confidence from the AI response, not a hardcoded value.
-    // 2. ADD: Basic validation of the AI response structure
     if (!aiResponse.explanation) {
       throw new Error("Received an invalid response from the analysis service.");
     }
@@ -72,13 +70,11 @@ const handleAnalyze = async () => {
     setAnalysisResult({
       address: contractAddress,
       explanation: aiResponse.explanation,
-      // Get confidence from AI, provide a fallback (e.g., 0) if it's missing
       confidence: aiResponse.confidence ?? 0 
     });
 
     } catch (err) {
       console.error("Analysis failed:", err);
-      // Provide a generic error message if it's not a defined Error object
       setError(err instanceof Error ? err.message : "An unknown error occurred during analysis."); 
     } finally {
       setIsAnalyzing(false);
