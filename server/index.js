@@ -7,11 +7,9 @@ const app = express();
 
 // Configure CORS to allow requests from your Vercel frontend
 app.use(cors({
-  origin: [
-    'https://ai-contract-explainer-duckchain.vercel.app',
-    'http://localhost:8080' // Optional: for local development
-  ],
-  credentials: true
+  origin: "*", // Allow ALL origins
+  methods: ["GET", "POST", "OPTIONS"], // Allow these methods
+  allowedHeaders: ["Content-Type"] // Allow these headers
 }));
 
 app.use(express.json()); // Parse JSON bodies
