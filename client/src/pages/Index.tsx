@@ -46,17 +46,6 @@ const Index = () => {
       });
 
     } catch (err) {
-        body: JSON.stringify({ bytecode, address: contractAddress })
-      }).then(res => res.json());
-
-      setAnalysisResult({
-        address: contractAddress,
-        explanation: aiResponse.explanation,
-        confidence: 92
-      });
-
-    } catch (err) {
-      
       console.error("Analysis failed:", err);
       console.log(err);
       setError(err instanceof Error ? err.message : "An unknown error occurred during analysis.");
