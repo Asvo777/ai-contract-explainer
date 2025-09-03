@@ -26,37 +26,52 @@ app.post('/api/analyze', async (req, res) => {
   }
 
   const prompt = `
-ROLE: You are a security auditor and educator. Your task is to explain complex smart contract bytecode to beginners.
+  Analyze this smart contract bytecode and return JSON with explanation and confidence.
 
-GUIDELINES:
-- NEVER try to generate, simulate, or write bytecode.
-- NEVER use technical phrases like "opcodes", "JUMPDEST", "CALLER", "msg.data", or "abi" in your explanation.
-- Your explanation must be in plain English, simple enough for a non-technical user to understand.
-- If the bytecode is just "0x", it is a wallet address, not a contract.
+  CONTRACT:
+  Address: ${address}
+  Bytecode: ${bytecode}
 
-THE TASK:
-Explain the following smart contract bytecode in simple terms. Describe what the contract most likely does based on common patterns.
+  GUIDELINES:
+  - Explain in simple, plain English for beginners
+  - No technical jargon like "opcodes", "JUMPDEST", or "abi"
+  - No markdown formatting
 
-Contract Address: ${address}
-Bytecode: ${bytecode}
+  YOUR EXPLANATION MUST FOLLOW THIS STRUCTURE BUT WITHOUT FORMATTING:
+  1. Purpose: [One sentence on the contract's overall goal]
+  2. Key Functions: [A simple list of 2-3 things it can probably do]
+  3. Summary: [A 1-2 sentence summary for a complete beginner]
 
-YOUR EXPLANATION MUST FOLLOW THIS STRUCTURE:
-1. **Purpose:** [One sentence on the contract's overall goal]
-2. **Key Functions:** [A simple list of 2-3 things it can probably do]
-3. **Plain English Summary:** [A 1-2 sentence summary for a complete beginner]
-`;
+  ALSO: Provide a confidence score between 0-100 based on how certain you are about this analysis.
+
+  RETURN JSON FORMAT:
+  {
+    "explanation": "Simple explanation following this structure: 1. Purpose: [overall goal]. 2. Key Functions: [2-3 capabilities]. 3. Summary: [beginner summary]",
+    "confidence": 85
+  }
+  `;
 
   try {
-    if (!model) {
-      throw new Error("Gemini AI model not initialized");
-    }
-
     const result = await model.generateContent(prompt);
-    const explanation = result.response.text();
-    const confidence = result.response.confidence;
-
-    res.json({ explanation, confidence });
-
+    const responseText = result.response.text();
+    
+    // Try to parse JSON from the response
+    try {
+      // Extract JSON from the response (Gemini might add extra text)
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const analysis = JSON.parse(jsonMatch[0]);
+        res.json(analysis);
+      } else {
+        throw new Error("No JSON found in response");
+      }
+    } catch (parseError) {
+      // Fallback if JSON parsing fails
+      res.json({ 
+        explanation: responseText, 
+        confidence: 75 
+      });
+    }
   } catch (error) {
     console.error("Google Gemini error:", error.message);
     res.status(500).json({ 
