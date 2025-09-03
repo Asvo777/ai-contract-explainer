@@ -33,9 +33,19 @@ const Index = () => {
       const bytecode = await getContractBytecode(contractAddress);
       console.log("Success! Bytecode length:", bytecode.length);
 
-      const aiResponse = await fetch(`https://ai-contract-explainer-production.up.railway.app/api/analyze`, {
+      const aiResponse = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bytecode, address: contractAddress })
+      }).then(res => res.json());
+
+      setAnalysisResult({
+        address: contractAddress,
+        explanation: aiResponse.explanation,
+        confidence: 92
+      });
+
+    } catch (err) {
         body: JSON.stringify({ bytecode, address: contractAddress })
       }).then(res => res.json());
 

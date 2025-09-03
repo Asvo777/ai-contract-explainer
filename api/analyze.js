@@ -4,14 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import 'dotenv/config';
 
 const app = express();
-
-// CORS configuration - this should work now
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
-
+app.use(cors());
 app.use(express.json());
 
 // Initialize Gemini with error handling
@@ -24,7 +17,7 @@ try {
   console.error("❌ Gemini initialization failed:", error.message);
 }
 
-app.post('/api/proxy-analyze', async (req, res) => {
+app.post('/api/analyze', async (req, res) => {
   const { bytecode, address } = req.body;
 
   // Handle preflight requests
