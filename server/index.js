@@ -1,52 +1,38 @@
 import express from 'express';
 import cors from 'cors';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import 'dotenv/config'; // To load .env variables
+import 'dotenv/config';
 
 const app = express();
 
-// Configure CORS to allow requests from your Vercel frontend
-//app.use(cors({
-//  origin: "*", // Allow ALL origins
-//  methods: ["GET", "POST", "OPTIONS"], // Allow these methods
-//  allowedHeaders: ["Content-Type"] // Allow these headers
-//}));
+// CORS configuration - this should work now
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
-app.use((req, res, next) => {
-  // Allow requests from your Vercel frontend and local development
-  const allowedOrigins = [
-    'https://ai-contract-explainer-duckchain.vercel.app',
-    'http://localhost:8080'
-  ];
-  const origin = req.headers.origin;
-  
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  // OR to allow all origins (for testing):
-  // res.setHeader('Access-Control-Allow-Origin', '*');
-  
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  // Handle preflight requests (important!)
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
+app.use(express.json());
 
-app.use(express.json()); // Parse JSON bodies
+// Initialize Gemini with error handling
+let genAI, model;
+try {
+  genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  model = genAI.getGenerativeModel({ model: "gemini-pro" }); // Using reliable model
+  console.log("✅ Google Gemini initialized successfully");
+} catch (error) {
+  console.error("❌ Gemini initialization failed:", error.message);
+}
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-console.log("Using Google Gemini API Key:", process.env.GEMINI_API_KEY ? "Set" : "Not Set");
-
-app.post('/api/analyze', async (req, res) => {
+app.post('/api/proxy-analyze', async (req, res) => {
   const { bytecode, address } = req.body;
 
-const prompt = `
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  const prompt = `
 ROLE: You are a security auditor and educator. Your task is to explain complex smart contract bytecode to beginners.
 
 GUIDELINES:
@@ -56,43 +42,52 @@ GUIDELINES:
 - If the bytecode is just "0x", it is a wallet address, not a contract.
 
 THE TASK:
-Explain the following smart contract bytecode in simple terms (2 to 5 sentences). Describe what the contract most likely does based on common patterns.
+Explain the following smart contract bytecode in simple terms. Describe what the contract most likely does based on common patterns.
 
 Contract Address: ${address}
 Bytecode: ${bytecode}
 
 YOUR EXPLANATION MUST FOLLOW THIS STRUCTURE:
 1. **Purpose:** [One sentence on the contract's overall goal]
-2. **Key Functions:** [A simple list of 2-3 things it can probably do, like "Hold funds", "Swap tokens", "Let users vote"]
+2. **Key Functions:** [A simple list of 2-3 things it can probably do]
 3. **Plain English Summary:** [A 1-2 sentence summary for a complete beginner]
-
-Remember: You are explaining the contract's behavior, not its code.
 `;
 
-   try {
-    
-    const result = await model.generateContent([prompt]);
-    const explanation = result.response.text();
+  try {
+    if (!model) {
+      throw new Error("Gemini AI model not initialized");
+    }
 
+    const result = await model.generateContent(prompt);
+    const explanation = result.response.text();
     
     res.json({ explanation });
 
   } catch (error) {
-    console.error("Google Gemini error:", error);
-    res.status(500).json({ error: "Failed to analyze contract" });
+    console.error("Google Gemini error:", error.message);
+    res.status(500).json({ 
+      error: "Failed to analyze contract",
+      details: error.message 
+    });
   }
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
+  });
 });
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server is running on port ${PORT}`);
+  console.log(`✅ Health check: http://localhost:${PORT}/health`);
 });
 
-// Add basic error handling
-process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
-});
-
+// Error handling
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
