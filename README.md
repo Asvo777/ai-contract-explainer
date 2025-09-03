@@ -36,27 +36,24 @@ DEVELOPMENT:
 
 2. INSTALL DEPENDENCIES:
    # Install frontend dependencies
-   npm install
-   
-   # Install backend dependencies
-   cd server
+   cd client
    npm install
 
-3. ENVIRONMENT SETUP:
+4. ENVIRONMENT SETUP:
    Create a .env file in the server/ directory with:
    GEMINI_API_KEY=your_google_gemini_api_key_here
    PORT=3001
    
    Get your Gemini API key from Google AI Studio: https://aistudio.google.com/
 
-4. RUN THE APPLICATION:
+5. RUN THE APPLICATION:
    # Terminal 1 - Start the backend (from server directory)
    npm run dev
    
    # Terminal 2 - Start the frontend (from root directory)
    npm run dev
 
-5. OPEN YOUR BROWSER:
+6. OPEN YOUR BROWSER:
    Navigate to http://localhost:3000
 
 ## 🚀 How to Use
@@ -104,7 +101,7 @@ Response: { status: 'OK', message: 'Server is running', timestamp: '...' }
 ## 🏗️ Project Structure
 
 duckchain-analyzer/
-├── public/                 # Static assets
+├── client/                 # Static assets
 ├── src/                   # Frontend source code
 │   ├── components/        # React components (HeroSection, ResultsSection, etc.)
 │   ├── lib/        # React components (HeroSection, ResultsSection, etc.)
