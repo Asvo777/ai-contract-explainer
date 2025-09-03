@@ -6,11 +6,35 @@ import 'dotenv/config'; // To load .env variables
 const app = express();
 
 // Configure CORS to allow requests from your Vercel frontend
-app.use(cors({
-  origin: "*", // Allow ALL origins
-  methods: ["GET", "POST", "OPTIONS"], // Allow these methods
-  allowedHeaders: ["Content-Type"] // Allow these headers
-}));
+//app.use(cors({
+//  origin: "*", // Allow ALL origins
+//  methods: ["GET", "POST", "OPTIONS"], // Allow these methods
+//  allowedHeaders: ["Content-Type"] // Allow these headers
+//}));
+
+app.use((req, res, next) => {
+  // Allow requests from your Vercel frontend and local development
+  const allowedOrigins = [
+    'https://ai-contract-explainer-duckchain.vercel.app',
+    'http://localhost:8080'
+  ];
+  const origin = req.headers.origin;
+  
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  // OR to allow all origins (for testing):
+  // res.setHeader('Access-Control-Allow-Origin', '*');
+  
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  // Handle preflight requests (important!)
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 app.use(express.json()); // Parse JSON bodies
 
@@ -62,4 +86,13 @@ Remember: You are explaining the contract's behavior, not its code.
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server is running on port ${PORT}`);
+});
+
+// Add basic error handling
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
