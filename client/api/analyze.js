@@ -53,14 +53,14 @@ app.post('/api/analyze', async (req, res) => {
 
   try {
     const result = await model.generateContent(prompt);
-    const responseText = result.response.text().replace(/\d+\./g, '\n');
+    const responseText = result.response.text();
 
     // Try to parse JSON from the response
     try {
       // Extract JSON from the response (Gemini might add extra text)
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        const analysis = JSON.parse(jsonMatch[0]);
+        const analysis = JSON.parse(jsonMatch[0]).replace(/\d+\./g, '\n');
         res.json(analysis);
       } else {
         throw new Error("No JSON found in response");
