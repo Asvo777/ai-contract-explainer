@@ -20,47 +20,66 @@ const Index = () => {
   } | null>(null);
   const [error, setError] = useState<string | null>(null); 
 
-  const handleAnalyze = async () => {
-    if (!contractAddress) return;
-    
-    setIsAnalyzing(true);
-    setError(null); 
-    setAnalysisResult(null); 
-    
-    try {
-      console.log("Fetching bytecode for:", contractAddress);
-      const bytecode = await getContractBytecode(contractAddress);
-      console.log("Success! Bytecode length:", bytecode.length);
+const handleAnalyze = async () => {
+  if (!contractAddress) return;
 
-      // 1. First get the response without parsing JSON
-      const response = await fetch("/api/analyze", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ bytecode, address: contractAddress })
-      });
+  setIsAnalyzing(true);
+  setError(null);
+  setAnalysisResult(null);
 
-      // 2. Check if the response is OK (status 200-299)
-      if (!response.ok) {
-        // Get the actual text to see what error the server returned
-        const errorText = await response.text();
-        console.error("Server error:", response.status, errorText);
-        throw new Error(`Server error: ${response.status} - ${errorText.substring(0, 100)}...`);
+  try {
+    console.log("Fetching bytecode for:", contractAddress);
+    const bytecode = await getContractBytecode(contractAddress);
+    
+    // Basic validation for empty bytecode (e.g., an EOA address was entered)
+    if (!bytecode || bytecode === '0x') {
+      throw new Error("This address does not contain any contract code. Please provide a valid contract address.");
+    }
+    
+    console.log("Success! Bytecode length:", bytecode.length);
+
+    const response = await fetch("/api/analyze", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bytecode, address: contractAddress })
+    });
+
+    // Check for HTTP errors
+    if (!response.ok) {
+      const errorText = await response.text();
+      let userFriendlyError = "Analysis failed due to a server error. Please try again.";
+
+      // You can tailor messages based on status codes
+      if (response.status === 404) {
+        userFriendlyError = "The analysis service is currently unavailable.";
+      } else if (response.status >= 500) {
+        userFriendlyError = "Our analysis engine encountered a problem. Please try again shortly.";
       }
+      // Log the technical error for debugging, but show a user-friendly one.
+      console.error(`Server error (${response.status}):`, errorText);
+      throw new Error(userFriendlyError);
+    }
 
-      // 3. Only now try to parse as JSON
-      const aiResponse = await response.json();
+    // Parse the successful JSON response
+    const aiResponse = await response.json();
 
-      setAnalysisResult({
-        address: contractAddress,
-        explanation: aiResponse.explanation,
-        confidence: 92
-      });
+    // 1. FIX: Use the confidence from the AI response, not a hardcoded value.
+    // 2. ADD: Basic validation of the AI response structure
+    if (!aiResponse.explanation) {
+      throw new Error("Received an invalid response from the analysis service.");
+    }
+
+    setAnalysisResult({
+      address: contractAddress,
+      explanation: aiResponse.explanation,
+      // Get confidence from AI, provide a fallback (e.g., 0) if it's missing
+      confidence: aiResponse.confidence ?? 0 
+    });
 
     } catch (err) {
       console.error("Analysis failed:", err);
-      setError(err instanceof Error ? err.message : "An unknown error occurred during analysis.");
+      // Provide a generic error message if it's not a defined Error object
+      setError(err instanceof Error ? err.message : "An unknown error occurred during analysis."); 
     } finally {
       setIsAnalyzing(false);
     }

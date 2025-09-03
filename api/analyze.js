@@ -53,8 +53,9 @@ YOUR EXPLANATION MUST FOLLOW THIS STRUCTURE:
 
     const result = await model.generateContent(prompt);
     const explanation = result.response.text();
-    
-    res.json({ explanation });
+    const confidence = result.response.confidence;
+
+    res.json({ explanation, confidence });
 
   } catch (error) {
     console.error("Google Gemini error:", error.message);
